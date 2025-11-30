@@ -10,25 +10,25 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pricofy/geocode-es/internal/domain"
-	"github.com/pricofy/geocode-es/internal/shared/logger"
+	"github.com/pricofy/geocode-pt/internal/domain"
+	"github.com/pricofy/geocode-pt/internal/shared/logger"
 )
 
-//go:embed postal-codes-es.json
+//go:embed postal-codes-pt.json
 var postalCodesJSON []byte
 
 // providerLogger is the logger instance for the provider package
 var providerLogger = logger.NewLogger("PostalCodeProvider")
 
-// PostalCodeProvider provides access to Spanish postal code data.
+// PostalCodeProvider provides access to Portuguese postal code data.
 // Implements lazy loading with sync.Once to ensure single initialization.
 // Builds optimized indices for O(1) lookups and fast autocomplete.
 type PostalCodeProvider struct {
-	codes              map[string]domain.PostalData
-	municipalityIndex     map[string][]postalEntry
-	municipalitySet       map[string]bool
-	sortedPostalCodes  []string
-	initOnce           sync.Once
+	codes             map[string]domain.PostalData
+	municipalityIndex map[string][]postalEntry
+	municipalitySet   map[string]bool
+	sortedPostalCodes []string
+	initOnce          sync.Once
 }
 
 // postalEntry represents a postal code entry in the municipality index.
@@ -57,7 +57,7 @@ func (p *PostalCodeProvider) getCodes() map[string]domain.PostalData {
 		p.buildIndexes(codes)
 
 		providerLogger.Info("Loaded postal codes database with indexes", map[string]interface{}{
-			"totalPostalCodes": len(codes),
+			"totalPostalCodes":    len(codes),
 			"uniqueMunicipalitys": len(p.municipalitySet),
 		})
 	})
@@ -92,8 +92,8 @@ func (p *PostalCodeProvider) buildIndexes(codes map[string]domain.PostalData) {
 	sort.Strings(p.sortedPostalCodes)
 
 	providerLogger.Debug("Built indexes", map[string]interface{}{
-		"municipalityIndexSize":      len(p.municipalityIndex),
-		"municipalitySetSize":        len(p.municipalitySet),
+		"municipalityIndexSize":   len(p.municipalityIndex),
+		"municipalitySetSize":     len(p.municipalitySet),
 		"sortedPostalCodesLength": len(p.sortedPostalCodes),
 	})
 }
@@ -134,7 +134,7 @@ func (p *PostalCodeProvider) calculateDistance(lat1, lon1, lat2, lon2 float64) f
 // Very fast operation (<1ms latency).
 //
 // Parameters:
-//   - postalCode: Spanish postal code (5 digits, e.g., "28001")
+//   - postalCode: Portuguese postal code (7 digits, e.g., "1000205")
 //
 // Returns:
 //   - GeocodingResult with coordinates, municipality, and province
@@ -154,21 +154,21 @@ func (p *PostalCodeProvider) GeocodeByPostalCode(postalCode string) (domain.Geoc
 	}
 
 	providerLogger.Info("Geocoding successful", map[string]interface{}{
-		"postalCode": postalCode,
-		"municipality":  data.Municipality,
-		"province":  data.Province,
-		"lat":        data.Lat,
-		"lon":        data.Lon,
-		"source":     "postal_code",
+		"postalCode":   postalCode,
+		"municipality": data.Municipality,
+		"province":     data.Province,
+		"lat":          data.Lat,
+		"lon":          data.Lon,
+		"source":       "postal_code",
 	})
 
 	return domain.GeocodingResult{
-		Success:    true,
-		Coords:     domain.Coordinates{Lat: data.Lat, Lon: data.Lon},
-		Municipality:  data.Municipality,
-		Province:  data.Province,
-		PostalCode: postalCode,
-		Source:     "postal_code",
+		Success:      true,
+		Coords:       domain.Coordinates{Lat: data.Lat, Lon: data.Lon},
+		Municipality: data.Municipality,
+		Province:     data.Province,
+		PostalCode:   postalCode,
+		Source:       "postal_code",
 	}, nil
 }
 
@@ -198,21 +198,21 @@ func (p *PostalCodeProvider) GeocodeByMunicipality(municipality string) (domain.
 	for postalCode, data := range codes {
 		if strings.ToLower(data.Municipality) == municipalityLower {
 			providerLogger.Info("Geocoding successful", map[string]interface{}{
-				"municipality":  municipality,
-				"postalCode": postalCode,
-				"province":  data.Province,
-				"lat":        data.Lat,
-				"lon":        data.Lon,
-				"source":     "municipality",
+				"municipality": municipality,
+				"postalCode":   postalCode,
+				"province":     data.Province,
+				"lat":          data.Lat,
+				"lon":          data.Lon,
+				"source":       "municipality",
 			})
 
 			return domain.GeocodingResult{
-				Success:    true,
-				Coords:     domain.Coordinates{Lat: data.Lat, Lon: data.Lon},
-				Municipality:  data.Municipality,
-				Province:  data.Province,
-				PostalCode: postalCode,
-				Source:     "municipality",
+				Success:      true,
+				Coords:       domain.Coordinates{Lat: data.Lat, Lon: data.Lon},
+				Municipality: data.Municipality,
+				Province:     data.Province,
+				PostalCode:   postalCode,
+				Source:       "municipality",
 			}, nil
 		}
 	}
@@ -281,21 +281,21 @@ func (p *PostalCodeProvider) ReverseGeocode(lat, lon float64) (domain.GeocodingR
 	distance := math.Round(minDistance*1000) / 1000
 
 	providerLogger.Info("Reverse geocoding successful", map[string]interface{}{
-		"lat":        lat,
-		"lon":        lon,
-		"postalCode": nearest.postalCode,
-		"municipality":  nearest.data.Municipality,
-		"province":  nearest.data.Province,
-		"distance":   distance,
+		"lat":          lat,
+		"lon":          lon,
+		"postalCode":   nearest.postalCode,
+		"municipality": nearest.data.Municipality,
+		"province":     nearest.data.Province,
+		"distance":     distance,
 	})
 
 	return domain.GeocodingResult{
-		Success:    true,
-		Coords:     domain.Coordinates{Lat: nearest.data.Lat, Lon: nearest.data.Lon},
-		Municipality:  nearest.data.Municipality,
-		Province:  nearest.data.Province,
-		PostalCode: nearest.postalCode,
-		Source:     "reverse_geocode",
+		Success:      true,
+		Coords:       domain.Coordinates{Lat: nearest.data.Lat, Lon: nearest.data.Lon},
+		Municipality: nearest.data.Municipality,
+		Province:     nearest.data.Province,
+		PostalCode:   nearest.postalCode,
+		Source:       "reverse_geocode",
 	}, distance, nil
 }
 
@@ -305,7 +305,7 @@ func (p *PostalCodeProvider) ReverseGeocode(lat, lon float64) (domain.GeocodingR
 // Very fast validation (<1ms latency).
 //
 // Parameters:
-//   - postalCode: Spanish postal code to validate (5 digits)
+//   - postalCode: Portuguese postal code to validate (7 digits)
 //
 // Returns:
 //   - true if postal code exists in the database
@@ -403,7 +403,7 @@ func (p *PostalCodeProvider) AutocompletePostalCode(prefix string, limit int) []
 		results = append(results, domain.AutocompleteResult{
 			PostalCode:   postalCode,
 			Municipality: data.Municipality,
-			Province:    data.Province,
+			Province:     data.Province,
 		})
 	}
 
@@ -465,7 +465,7 @@ func (p *PostalCodeProvider) AutocompleteMunicipality(query string, limit int) [
 					result: domain.AutocompleteResult{
 						PostalCode:   entry.PostalCode,
 						Municipality: entry.Data.Municipality,
-						Province:    entry.Data.Province,
+						Province:     entry.Data.Province,
 					},
 					startsWith: startsWith,
 				})
@@ -497,4 +497,3 @@ func (p *PostalCodeProvider) AutocompleteMunicipality(query string, limit int) [
 
 	return results
 }
-

@@ -5,9 +5,9 @@ import (
 	"math"
 	"regexp"
 
-	"github.com/pricofy/geocode-es/internal/domain"
-	"github.com/pricofy/geocode-es/internal/infrastructure/provider"
-	"github.com/pricofy/geocode-es/internal/shared/logger"
+	"github.com/pricofy/geocode-pt/internal/domain"
+	"github.com/pricofy/geocode-pt/internal/infrastructure/provider"
+	"github.com/pricofy/geocode-pt/internal/shared/logger"
 )
 
 // serviceLogger is the logger instance for the service
@@ -211,7 +211,7 @@ func (s *PostalCodeService) ReverseGeocode(event domain.LambdaEvent) (domain.Rev
 		City:       result.Municipality,
 		PostalCode: result.PostalCode,
 		Province:   result.Province,
-		Country:    "España",
+		Country:    "Portugal",
 		Coords:     result.Coords,
 		Distance:   distance,
 	}, nil

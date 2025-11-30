@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pricofy/geocode-es/internal/domain"
+	"github.com/pricofy/geocode-pt/internal/domain"
 )
 
 func TestHandleRequest(t *testing.T) {

@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/pricofy/geocode-es/internal/application"
-	"github.com/pricofy/geocode-es/internal/domain"
-	"github.com/pricofy/geocode-es/internal/shared/logger"
+	"github.com/pricofy/geocode-pt/internal/application"
+	"github.com/pricofy/geocode-pt/internal/domain"
+	"github.com/pricofy/geocode-pt/internal/shared/logger"
 )
 
 // handlerLogger is the logger instance for the handler

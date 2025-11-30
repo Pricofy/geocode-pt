@@ -3,7 +3,7 @@ package provider
 import (
 	"testing"
 
-	"github.com/pricofy/geocode-es/internal/domain"
+	"github.com/pricofy/geocode-pt/internal/domain"
 )
 
 func TestPostalCodeProvider_GeocodeByPostalCode(t *testing.T) {
@@ -16,14 +16,14 @@ func TestPostalCodeProvider_GeocodeByPostalCode(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name:        "valid postal code - Madrid",
-			postalCode:  "28001",
+			name:        "valid postal code - Lisbon",
+			postalCode:  "1000205",
 			wantSuccess: true,
 			wantErr:     false,
 		},
 		{
-			name:        "valid postal code - Barcelona",
-			postalCode:  "08001",
+			name:        "valid postal code - Porto",
+			postalCode:  "4000050",
 			wantSuccess: true,
 			wantErr:     false,
 		},
@@ -74,34 +74,34 @@ func TestPostalCodeProvider_GeocodeByMunicipality(t *testing.T) {
 	p := NewPostalCodeProvider()
 
 	tests := []struct {
-		name        string
+		name         string
 		municipality string
-		wantSuccess bool
-		wantErr     bool
+		wantSuccess  bool
+		wantErr      bool
 	}{
 		{
-			name:         "valid municipality - Madrid",
-			municipality: "Madrid",
-			wantSuccess: true,
-			wantErr:     false,
+			name:         "valid municipality - Lisbon",
+			municipality: "Lisboa",
+			wantSuccess:  true,
+			wantErr:      false,
 		},
 		{
-			name:         "valid municipality - Barcelona",
-			municipality: "Barcelona",
-			wantSuccess: true,
-			wantErr:     false,
+			name:         "valid municipality - Porto",
+			municipality: "Porto",
+			wantSuccess:  true,
+			wantErr:      false,
 		},
 		{
 			name:         "invalid municipality",
 			municipality: "NonExistentCity",
-			wantSuccess: false,
-			wantErr:     true,
+			wantSuccess:  false,
+			wantErr:      true,
 		},
 		{
-			name:        "case insensitive",
-			municipality: "madrid",
-			wantSuccess: true,
-			wantErr:     false,
+			name:         "case insensitive",
+			municipality: "lisboa",
+			wantSuccess:  true,
+			wantErr:      false,
 		},
 	}
 
@@ -139,23 +139,23 @@ func TestPostalCodeProvider_ReverseGeocode(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name:        "Madrid coordinates",
-			lat:         40.4168,
-			lon:         -3.7038,
+			name:        "Lisbon coordinates",
+			lat:         38.7167,
+			lon:         -9.1333,
 			wantSuccess: true,
 			wantErr:     false,
 		},
 		{
-			name:        "Barcelona coordinates",
-			lat:         41.3851,
-			lon:         2.1734,
+			name:        "Porto coordinates",
+			lat:         41.1496,
+			lon:         -8.611,
 			wantSuccess: true,
 			wantErr:     false,
 		},
 		{
-			name:        "Valid coordinates in Spain",
-			lat:         39.4765,
-			lon:         -6.3722,
+			name:        "Valid coordinates in Portugal",
+			lat:         39.3999,
+			lon:         -8.2245,
 			wantSuccess: true,
 			wantErr:     false,
 		},
@@ -200,7 +200,7 @@ func TestPostalCodeProvider_ValidatePostalCode(t *testing.T) {
 	}{
 		{
 			name:       "valid postal code",
-			postalCode: "28001",
+			postalCode: "1000205",
 			want:       true,
 		},
 		{
@@ -229,24 +229,24 @@ func TestPostalCodeProvider_ValidateMunicipality(t *testing.T) {
 	p := NewPostalCodeProvider()
 
 	tests := []struct {
-		name      string
+		name         string
 		municipality string
-		want      bool
+		want         bool
 	}{
 		{
 			name:         "valid municipality",
-			municipality: "Madrid",
-			want:      true,
+			municipality: "Lisboa",
+			want:         true,
 		},
 		{
-			name:      "case insensitive",
-			municipality: "madrid",
-			want:      true,
+			name:         "case insensitive",
+			municipality: "lisboa",
+			want:         true,
 		},
 		{
 			name:         "invalid municipality",
 			municipality: "NonExistentCity",
-			want:      false,
+			want:         false,
 		},
 	}
 
@@ -271,22 +271,22 @@ func TestPostalCodeProvider_AutocompletePostalCode(t *testing.T) {
 		wantErr   bool
 	}{
 		{
-			name:      "prefix 280",
-			prefix:    "280",
+			name:      "prefix 10",
+			prefix:    "10",
 			limit:     10,
 			wantCount: 10,
 			wantErr:   false,
 		},
 		{
-			name:      "prefix 08",
-			prefix:    "08",
+			name:      "prefix 40",
+			prefix:    "40",
 			limit:     5,
 			wantCount: 5,
 			wantErr:   false,
 		},
 		{
 			name:      "non-existent prefix",
-			prefix:    "99",
+			prefix:    "000",
 			limit:     10,
 			wantCount: 0,
 			wantErr:   false,
@@ -323,22 +323,22 @@ func TestPostalCodeProvider_AutocompleteMunicipality(t *testing.T) {
 		wantErr   bool
 	}{
 		{
-			name:      "query 'mad'",
-			query:     "mad",
+			name:      "query 'Lis'",
+			query:     "Lis",
 			limit:     10,
 			wantCount: 10,
 			wantErr:   false,
 		},
 		{
-			name:      "query 'bar'",
-			query:     "bar",
+			name:      "query 'Por'",
+			query:     "Por",
 			limit:     5,
 			wantCount: 5,
 			wantErr:   false,
 		},
 		{
 			name:      "case insensitive",
-			query:     "MAD",
+			query:     "LIS",
 			limit:     10,
 			wantCount: 10,
 			wantErr:   false,
@@ -370,25 +370,25 @@ func TestPostalCodeProvider_CalculateDistance(t *testing.T) {
 	p := NewPostalCodeProvider()
 
 	// Test Haversine distance calculation
-	// Madrid coordinates
-	madridLat, madridLon := 40.4168, -3.7038
-	barcelonaLat, barcelonaLon := 41.3851, 2.1734
+	// Lisbon coordinates
+	lisbonLat, lisbonLon := 38.7167, -9.1333
+	portoLat, portoLon := 41.1496, -8.611
 
-	_, dist, err := p.ReverseGeocode(madridLat, madridLon)
+	_, dist, err := p.ReverseGeocode(lisbonLat, lisbonLon)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	_, dist2, err := p.ReverseGeocode(barcelonaLat, barcelonaLon)
+	_, dist2, err := p.ReverseGeocode(portoLat, portoLon)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
 	// Distance should be reasonable (not negative, not too large)
 	if dist < 0 || dist > 1000 {
-		t.Errorf("Distance from Madrid seems incorrect: %f km", dist)
+		t.Errorf("Distance from Lisbon seems incorrect: %f km", dist)
 	}
 	if dist2 < 0 || dist2 > 1000 {
-		t.Errorf("Distance from Barcelona seems incorrect: %f km", dist2)
+		t.Errorf("Distance from Porto seems incorrect: %f km", dist2)
 	}
 }

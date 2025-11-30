@@ -41,7 +41,7 @@
 # Variables
 GO = go
 GOTEST = $(GO) test
-BINARY = pricofy-geocode-es
+BINARY = pricofy-geocode-pt
 ENV ?= dev
 
 # AWS Configuration (determined by ENV)
@@ -59,9 +59,9 @@ else
 endif
 
 # Service configuration
-SERVICE_NAME = pricofy-geocode-es
-STACK_SERVICE = PricofyGeocodeEsStack
-LAMBDA_GEOCODE = pricofy-geocode-es
+SERVICE_NAME = pricofy-geocode-pt
+STACK_SERVICE = PricofyGeocodePtStack
+LAMBDA_GEOCODE = pricofy-geocode-pt
 
 # Default target: build and test
 all: build test ## Build and test (default)
@@ -295,21 +295,21 @@ test-geocode: ## Test geocode Lambda (ENV=dev)
 	@echo "Test: geocode-by-postal"
 	@aws lambda invoke \
 		--function-name $(LAMBDA_GEOCODE) \
-		--payload '{"body":"{\"operation\":\"geocode-by-postal\",\"postalCode\":\"28001\"}"}' \
+		--payload $(shell echo '{"body":"{\"operation\":\"geocode-by-postal\",\"postalCode\":\"1000001\"}"}' | base64 -w 0) \
 		response.json
 	@cat response.json | jq '.'
 	@echo ""
 	@echo "Test: reverse-geocode"
 	@aws lambda invoke \
 		--function-name $(LAMBDA_GEOCODE) \
-		--payload '{"body":"{\"operation\":\"reverse-geocode\",\"lat\":40.4168,\"lon\":-3.7038}"}' \
+		--payload $(shell echo '{"body":"{\"operation\":\"reverse-geocode\",\"lat\":40.4168,\"lon\":-3.7038}"}' | base64 -w 0) \
 		response.json
 	@cat response.json | jq '.'
 	@echo ""
 	@echo "Test: validate-postal"
 	@aws lambda invoke \
 		--function-name $(LAMBDA_GEOCODE) \
-		--payload '{"body":"{\"operation\":\"validate-postal\",\"postalCode\":\"28001\"}"}' \
+		--payload $(shell echo '{"body":"{\"operation\":\"validate-postal\",\"postalCode\":\"28001\"}"}' | base64 -w 0) \
 		response.json
 	@cat response.json | jq '.'
 	@echo ""

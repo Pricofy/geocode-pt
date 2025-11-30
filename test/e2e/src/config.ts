@@ -49,8 +49,8 @@ export function getConfig(): TestConfig {
   }
   
   // Lambda function name is the same across environments (environment is differentiated by AWS account)
-  // The function is deployed as 'pricofy-geocode-es' in both dev and prod accounts
-  const defaultFunctionName = 'pricofy-geocode-es';
+  // The function is deployed as 'pricofy-geocode-pt' in both dev and prod accounts
+  const defaultFunctionName = 'pricofy-geocode-pt';
   
   return {
     awsRegion: process.env.AWS_REGION || 'eu-west-1',

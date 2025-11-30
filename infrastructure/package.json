@@ -1,7 +1,7 @@
 {
-  "name": "pricofy-geocode-es-infrastructure",
+  "name": "pricofy-geocode-pt-infrastructure",
   "version": "1.0.0",
-  "description": "CDK infrastructure for Pricofy Geocode ES",
+  "description": "CDK infrastructure for Pricofy Geocode PT",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
