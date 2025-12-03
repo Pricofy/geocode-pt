@@ -6,7 +6,7 @@
 *.dylib
 *.test
 go.work
-pricofy-geocode-es
+pricofy-geocode-pt
 
 # Build
 dist/
@@ -16,13 +16,14 @@ dist/
 # CDK (infrastructure uses TypeScript)
 infrastructure/cdk.out/
 infrastructure/node_modules/
-infrastructure/*.js
-infrastructure/*.d.ts
+infrastructure/**/*.js
+infrastructure/**/*.d.ts
 !infrastructure/jest.config.js
+!scripts/**/*.js
 
 # GeoNames (downloaded files, not the generated JSON)
-scripts/ES.txt
-scripts/ES.zip
+scripts/PT.txt
+scripts/PT.zip
 scripts/readme.txt
 
 # Tests

@@ -1,12 +1,12 @@
-# Pricofy Geocode ES - Infrastructure
+# Pricofy Geocode PT - Infrastructure
 
-This directory contains the AWS CDK infrastructure-as-code for deploying the **pricofy-geocode-es** service.
+This directory contains the AWS CDK infrastructure-as-code for deploying the **pricofy-geocode-pt** service.
 
 ## Overview
 
 The infrastructure is defined using AWS CDK (Cloud Development Kit) and deploys:
 
-- **Lambda Function**: Single function (`pricofy-geocode-es-{env}`) with internal routing
+- **Lambda Function**: Single function (`pricofy-geocode-pt-{env}`) with internal routing
   - Handler: `bootstrap` (Go binary entry point)
   - Runtime: `PROVIDED_AL2023` (Go custom runtime)
   - Memory: 128 MB (optimized for Go, reduced from 256MB Node.js)
@@ -19,7 +19,7 @@ Unlike `pricofy-location-service`, this service uses a **single Lambda with inte
 
 ```
 ┌─────────────────────────────────────┐
-│  pricofy-geocode-es Lambda          │
+│  pricofy-geocode-pt Lambda          │
 │  (Go binary: bootstrap)             │
 │                                     │
 │  ┌───────────────────────────────┐ │
@@ -60,7 +60,7 @@ This service is NOT a REST API - it's invoked directly by `pricofy-location-serv
 
 ### Resources
 
-- **Lambda Function**: `pricofy-geocode-es-{env}`
+- **Lambda Function**: `pricofy-geocode-pt-{env}`
   - No external layers required (static data bundled)
   - No API Gateway (Lambda-to-Lambda invocation)
   - X-Ray tracing enabled for observability
@@ -84,7 +84,7 @@ This service is NOT a REST API - it's invoked directly by `pricofy-location-serv
 
 ### Deploy via Make (Recommended)
 
-From the root of `pricofy-geocode-es`:
+From the root of `pricofy-geocode-pt`:
 
 ```bash
 # Development
@@ -100,7 +100,7 @@ make deploy ENV=prod
 cd infrastructure
 npm install
 npm run build
-cdk deploy GeocodeEsStack-dev --context environment=dev
+cdk deploy GeocodePtStack-dev --context environment=dev
 ```
 
 ## Testing
@@ -142,7 +142,7 @@ This service is optimized for minimal cost:
 
 CloudWatch Logs:
 ```bash
-aws logs tail /aws/lambda/pricofy-geocode-es-dev --follow
+aws logs tail /aws/lambda/pricofy-geocode-pt-dev --follow
 ```
 
 X-Ray traces:
@@ -172,7 +172,7 @@ make clean
 make install
 make build
 cd infrastructure && npm install && npm run build
-cdk deploy GeocodeEsStack-dev --context environment=dev
+cdk deploy GeocodePtStack-dev --context environment=dev
 ```
 
 **Note**: The Go binary (`dist/bootstrap`) must be built before CDK deployment. CDK packages the binary from `dist/` directory.

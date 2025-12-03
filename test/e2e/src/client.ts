@@ -1,7 +1,7 @@
 /**
  * Geocode ES Lambda Client
  * 
- * Client for invoking the pricofy-geocode-es Lambda function via AWS SDK.
+ * Client for invoking the pricofy-geocode-pt Lambda function via AWS SDK.
  */
 
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
@@ -49,7 +49,7 @@ export interface LambdaResponse {
 /**
  * Client for invoking Geocode ES Lambda function
  */
-export class GeocodeESClient {
+export class GeocodePTClient {
   private client: LambdaClient;
   private functionName: string;
 

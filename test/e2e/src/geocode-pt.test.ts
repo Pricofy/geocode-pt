@@ -1,7 +1,7 @@
 /**
- * Geocode ES End-to-End Tests
+ * Geocode PT End-to-End Tests
  * 
- * Comprehensive integration tests for the pricofy-geocode-es Lambda function.
+ * Comprehensive integration tests for the pricofy-geocode-pt Lambda function.
  * Tests all 6 operations with real Lambda invocations and measures execution time.
  * 
  * Test Coverage:
@@ -15,7 +15,7 @@
  * - Performance Benchmarks
  */
 
-import { GeocodeESClient } from './client';
+import { GeocodePTClient } from './client';
 import { getConfig, validateConfig } from './config';
 
 // Validate configuration before running tests
@@ -25,11 +25,11 @@ validateConfig();
 const config = getConfig();
 
 // Initialize client
-const client = new GeocodeESClient();
+const client = new GeocodePTClient();
 
-describe('Geocode ES E2E Tests', () => {
+describe('Geocode PT E2E Tests', () => {
   beforeAll(() => {
-    console.log('🚀 Starting Geocode ES E2E Tests');
+    console.log('🚀 Starting Geocode PT E2E Tests');
     console.log(`🌍 Environment: ${config.environment}`);
     console.log(`📍 Lambda Function: ${config.lambdaFunctionName} (testing by name, not ARN/ID)`);
     console.log(`💡 Note: Function name is the same across environments. Environment is differentiated by AWS account.`);
@@ -38,7 +38,7 @@ describe('Geocode ES E2E Tests', () => {
   });
 
   afterAll(() => {
-    console.log('\n🏁 Geocode ES E2E Tests Completed');
+    console.log('\n🏁 Geocode PT E2E Tests Completed');
   });
 
   // ============================================================================
@@ -168,7 +168,7 @@ describe('Geocode ES E2E Tests', () => {
       expect(result).toHaveProperty('city');
       expect(result).toHaveProperty('postalCode');
       expect(result).toHaveProperty('province');
-      expect(result).toHaveProperty('country', 'España');
+      expect(result).toHaveProperty('country', 'Portugal');
       expect(result).toHaveProperty('distance');
 
       // Distance should be small (within Madrid)
@@ -464,7 +464,7 @@ describe('Geocode ES E2E Tests', () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.country).toBe('España');
+      expect(response.body.country).toBe('Portugal');
 
       console.log(`   ✅ Successfully handled Canary Islands coordinates`);
       console.log(`   City: ${response.body.city}, Postal: ${response.body.postalCode}`);
@@ -478,7 +478,7 @@ describe('Geocode ES E2E Tests', () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.country).toBe('España');
+      expect(response.body.country).toBe('Portugal');
 
       console.log(`   ✅ Successfully handled Balearic Islands coordinates`);
       console.log(`   City: ${response.body.city}, Postal: ${response.body.postalCode}`);
@@ -490,14 +490,14 @@ describe('Geocode ES E2E Tests', () => {
       // Paris, France
       const response = await client.reverseGeocode(48.8566, 2.3522);
 
-      // Should either return error or closest Spanish location
+      // Should either return error or closest Portuguese location
       if (response.statusCode === 400) {
         expect(response.body.success).toBe(false);
         console.log(`   ✅ Correctly rejected coordinates outside Spain`);
       } else {
         expect(response.statusCode).toBe(200);
-        expect(response.body.country).toBe('España');
-        console.log(`   ✅ Returned closest Spanish location`);
+        expect(response.body.country).toBe('Portugal');
+        console.log(`   ✅ Returned closest Portuguese location`);
       }
     }, 30000);
   });

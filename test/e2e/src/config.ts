@@ -22,7 +22,7 @@ export interface TestConfig {
 /**
  * Get test configuration from environment variables
  * 
- * The Lambda function name is 'pricofy-geocode-es' for both dev and prod environments.
+ * The Lambda function name is 'pricofy-geocode-pt' for both dev and prod environments.
  * Environment is differentiated by AWS account (via AWS_PROFILE), not by function name.
  * 
  * We search by function name, not by ARN or ID, to ensure tests work after redeployments.
