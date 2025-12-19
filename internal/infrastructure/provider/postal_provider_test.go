@@ -392,3 +392,139 @@ func TestPostalCodeProvider_CalculateDistance(t *testing.T) {
 		t.Errorf("Distance from Porto seems incorrect: %f km", dist2)
 	}
 }
+
+//nolint:gocognit // Test function with table-driven tests has inherent complexity
+func TestPostalCodeProvider_GeocodeByMunicipalitiesBatch(t *testing.T) {
+	p := NewPostalCodeProvider()
+
+	tests := []struct {
+		name           string
+		municipalities []string
+		wantFound      int
+		wantNotFound   int
+	}{
+		{
+			name:           "all valid municipalities",
+			municipalities: []string{"Lisboa", "Porto", "Braga"},
+			wantFound:      3,
+			wantNotFound:   0,
+		},
+		{
+			name:           "mixed valid and invalid",
+			municipalities: []string{"Lisboa", "NonExistent", "Porto"},
+			wantFound:      2,
+			wantNotFound:   1,
+		},
+		{
+			name:           "all invalid",
+			municipalities: []string{"NonExistent1", "NonExistent2"},
+			wantFound:      0,
+			wantNotFound:   2,
+		},
+		{
+			name:           "case insensitive",
+			municipalities: []string{"LISBOA", "porto", "BrAgA"},
+			wantFound:      3,
+			wantNotFound:   0,
+		},
+		{
+			name:           "empty list",
+			municipalities: []string{},
+			wantFound:      0,
+			wantNotFound:   0,
+		},
+		{
+			name:           "single municipality",
+			municipalities: []string{"Coimbra"},
+			wantFound:      1,
+			wantNotFound:   0,
+		},
+		{
+			name:           "with whitespace",
+			municipalities: []string{" Lisboa ", "  Porto"},
+			wantFound:      2,
+			wantNotFound:   0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			results := p.GeocodeByMunicipalitiesBatch(tt.municipalities)
+
+			// Count found and not found
+			foundCount := 0
+			notFoundCount := 0
+			for _, result := range results {
+				if result != nil && result.Found {
+					foundCount++
+				} else {
+					notFoundCount++
+				}
+			}
+
+			if foundCount != tt.wantFound {
+				t.Errorf("Expected %d found, got %d", tt.wantFound, foundCount)
+			}
+			if notFoundCount != tt.wantNotFound {
+				t.Errorf("Expected %d not found, got %d", tt.wantNotFound, notFoundCount)
+			}
+
+			// Verify found results have valid coordinates
+			for municipality, result := range results {
+				if result != nil && result.Found {
+					if result.Lat == 0 && result.Lon == 0 {
+						t.Errorf("Municipality %s has zero coordinates", municipality)
+					}
+					if result.PostalCode == "" {
+						t.Errorf("Municipality %s has empty postal code", municipality)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestPostalCodeProvider_GeocodeByMunicipalitiesBatch_Preserves_Original_Names(t *testing.T) {
+	p := NewPostalCodeProvider()
+
+	// Test that the original municipality names are preserved as keys
+	municipalities := []string{"Lisboa", "PORTO", "braga"}
+	results := p.GeocodeByMunicipalitiesBatch(municipalities)
+
+	// Check that original names are used as keys
+	for _, original := range municipalities {
+		if _, ok := results[original]; !ok {
+			t.Errorf("Original name '%s' not found in results keys", original)
+		}
+	}
+}
+
+func TestPostalCodeProvider_GeocodeByMunicipalitiesBatch_Large_Batch(t *testing.T) {
+	p := NewPostalCodeProvider()
+
+	// Test with a larger batch
+	municipalities := []string{
+		"Lisboa", "Porto", "Braga", "Coimbra", "Faro",
+		"Aveiro", "Leiria", "Setúbal", "Viseu", "Évora",
+		"Guarda", "Santarém", "Beja", "Castelo Branco", "Viana do Castelo",
+	}
+
+	results := p.GeocodeByMunicipalitiesBatch(municipalities)
+
+	if len(results) != len(municipalities) {
+		t.Errorf("Expected %d results, got %d", len(municipalities), len(results))
+	}
+
+	// Count how many were found
+	foundCount := 0
+	for _, result := range results {
+		if result != nil && result.Found {
+			foundCount++
+		}
+	}
+
+	// Most major cities should be found
+	if foundCount < 10 {
+		t.Errorf("Expected at least 10 cities to be found, got %d", foundCount)
+	}
+}

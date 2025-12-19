@@ -35,7 +35,10 @@ func Handler(_ context.Context, event interface{}) (domain.LambdaResponse, error
 		handlerLogger.Error("Failed to marshal event", err, nil)
 		errorBody, _ := json.Marshal(map[string]interface{}{
 			"success": false,
-			"error":   "Invalid event format",
+			"error": map[string]interface{}{
+				"code":    "VALIDATION_ERROR",
+				"message": "Invalid event format",
+			},
 		})
 		return domain.LambdaResponse{
 			StatusCode: 400,
@@ -56,7 +59,10 @@ func Handler(_ context.Context, event interface{}) (domain.LambdaResponse, error
 		handlerLogger.Error("Failed to parse request body", err, nil)
 		errorBody, _ := json.Marshal(map[string]interface{}{
 			"success": false,
-			"error":   "Invalid JSON in request body",
+			"error": map[string]interface{}{
+				"code":    "VALIDATION_ERROR",
+				"message": "Invalid JSON in request body",
+			},
 		})
 		return domain.LambdaResponse{
 			StatusCode: 400,
@@ -74,7 +80,10 @@ func Handler(_ context.Context, event interface{}) (domain.LambdaResponse, error
 	if body.Operation == "" {
 		errorBody, _ := json.Marshal(map[string]interface{}{
 			"success": false,
-			"error":   "Operation parameter is required",
+			"error": map[string]interface{}{
+				"code":    "VALIDATION_ERROR",
+				"message": "Operation parameter is required",
+			},
 		})
 		return domain.LambdaResponse{
 			StatusCode: 400,
@@ -108,7 +117,10 @@ func Handler(_ context.Context, event interface{}) (domain.LambdaResponse, error
 	default:
 		errorBody, _ := json.Marshal(map[string]interface{}{
 			"success": false,
-			"error":   "Operation '" + body.Operation + "' not supported. Supported operations: geocode-by-postal, reverse-geocode, validate-postal, validate-municipality, autocomplete-postal, autocomplete-municipality",
+			"error": map[string]interface{}{
+				"code":    "BAD_REQUEST",
+				"message": "Operation '" + body.Operation + "' not supported. Supported operations: geocode-by-postal, reverse-geocode, validate-postal, validate-municipality, autocomplete-postal, autocomplete-municipality",
+			},
 		})
 		return domain.LambdaResponse{
 			StatusCode: 400,

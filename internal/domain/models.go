@@ -67,13 +67,30 @@ type LambdaResponse struct {
 // RequestBody represents the parsed request body from LambdaEvent.
 // Used for routing operations based on the "operation" field.
 type RequestBody struct {
-	Operation    string   `json:"operation"`
-	PostalCode   *string  `json:"postalCode,omitempty"`
-	Municipality *string  `json:"municipality,omitempty"`
-	Lat          *float64 `json:"lat,omitempty"`
-	Lon          *float64 `json:"lon,omitempty"`
-	Prefix       *string  `json:"prefix,omitempty"`
-	Query        *string  `json:"query,omitempty"`
-	Limit        *int     `json:"limit,omitempty"`
+	Operation       string   `json:"operation"`
+	PostalCode      *string  `json:"postalCode,omitempty"`
+	Municipality    *string  `json:"municipality,omitempty"`
+	Lat             *float64 `json:"lat,omitempty"`
+	Lon             *float64 `json:"lon,omitempty"`
+	Prefix          *string  `json:"prefix,omitempty"`
+	Query           *string  `json:"query,omitempty"`
+	Limit           *int     `json:"limit,omitempty"`
+	Municipalities  []string `json:"municipalities,omitempty"`
+}
+
+// BatchGeocodingResult represents the result of geocoding a single municipality in a batch operation.
+type BatchGeocodingResult struct {
+	Lat        float64 `json:"lat"`
+	Lon        float64 `json:"lon"`
+	Found      bool    `json:"found"`
+	PostalCode string  `json:"postalCode"`
+}
+
+// BatchGeocodingResponse represents the response for a batch geocoding operation.
+type BatchGeocodingResponse struct {
+	Success bool                             `json:"success"`
+	Results map[string]*BatchGeocodingResult `json:"results"`
+	Count   int                              `json:"count"`
+	Errors  []string                         `json:"errors"`
 }
 

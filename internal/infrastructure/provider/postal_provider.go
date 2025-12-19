@@ -497,3 +497,31 @@ func (p *PostalCodeProvider) AutocompleteMunicipality(query string, limit int) [
 
 	return results
 }
+
+// GeocodeByMunicipalitiesBatch geocodes multiple municipalities in a single batch operation.
+func (p *PostalCodeProvider) GeocodeByMunicipalitiesBatch(municipalities []string) map[string]*domain.BatchGeocodingResult {
+	providerLogger.Debug("Batch geocoding municipalities", map[string]interface{}{"count": len(municipalities)})
+	p.getCodes()
+	results := make(map[string]*domain.BatchGeocodingResult, len(municipalities))
+
+	for _, municipality := range municipalities {
+		municipalityLower := strings.ToLower(strings.TrimSpace(municipality))
+		if entries, ok := p.municipalityIndex[municipalityLower]; ok && len(entries) > 0 {
+			entry := entries[0]
+			results[municipality] = &domain.BatchGeocodingResult{
+				Lat: entry.Data.Lat, Lon: entry.Data.Lon, Found: true, PostalCode: entry.PostalCode,
+			}
+		} else {
+			results[municipality] = nil
+		}
+	}
+
+	foundCount := 0
+	for _, result := range results {
+		if result != nil && result.Found {
+			foundCount++
+		}
+	}
+	providerLogger.Info("Batch geocoding completed", map[string]interface{}{"requested": len(municipalities), "found": foundCount})
+	return results
+}

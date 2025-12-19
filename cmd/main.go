@@ -118,6 +118,8 @@ func (a *App) HandleRequest(ctx context.Context, event domain.LambdaEvent) (doma
 		return a.handleAutocompletePostal(ctx, event)
 	case "autocomplete-municipality":
 		return a.handleAutocompleteMunicipality(ctx, event)
+	case "geocode-municipalities-batch":
+		return a.handleGeocodeMunicipalitiesBatch(ctx, event)
 	default:
 		a.logger.Warn(fmt.Sprintf("Unknown operation requested: %s", operation), map[string]interface{}{
 			"operation": operation,
@@ -285,6 +287,37 @@ func (a *App) handleAutocompleteMunicipality(_ context.Context, event domain.Lam
 		"success": true,
 		"results": results,
 	})
+	return domain.LambdaResponse{
+		StatusCode: 200,
+		Body:       string(body),
+	}, nil
+}
+
+// handleGeocodeMunicipalitiesBatch handles geocode-municipalities-batch operation.
+func (a *App) handleGeocodeMunicipalitiesBatch(_ context.Context, event domain.LambdaEvent) (domain.LambdaResponse, error) {
+	result, err := a.service.GeocodeMunicipalitiesBatch(event)
+	if err != nil {
+		if _, ok := err.(*domain.ValidationError); ok {
+			body, _ := json.Marshal(map[string]interface{}{
+				"success": false,
+				"error":   err.Error(),
+			})
+			return domain.LambdaResponse{
+				StatusCode: 400,
+				Body:       string(body),
+			}, nil
+		}
+		body, _ := json.Marshal(map[string]interface{}{
+			"success": false,
+			"error":   "Internal server error",
+		})
+		return domain.LambdaResponse{
+			StatusCode: 500,
+			Body:       string(body),
+		}, nil
+	}
+
+	body, _ := json.Marshal(result)
 	return domain.LambdaResponse{
 		StatusCode: 200,
 		Body:       string(body),

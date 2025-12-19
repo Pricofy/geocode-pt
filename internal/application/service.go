@@ -422,3 +422,56 @@ func (s *PostalCodeService) parseAutocompleteInput(event domain.LambdaEvent, isP
 
 	return value, limit, nil
 }
+
+// GeocodeMunicipalitiesBatch geocodes multiple municipalities in a single batch operation.
+//
+// Efficiently geocodes multiple municipalities by utilizing the in-memory municipality index.
+// Returns a map with results for each municipality (found or not found).
+//
+// Parameters:
+//   - event: LambdaEvent containing municipalities array in the body
+//
+// Returns:
+//   - BatchGeocodingResponse with results map and statistics
+//   - error if input parsing fails or municipalities array is empty
+func (s *PostalCodeService) GeocodeMunicipalitiesBatch(event domain.LambdaEvent) (domain.BatchGeocodingResponse, error) {
+	var body domain.RequestBody
+	if err := json.Unmarshal([]byte(event.Body), &body); err != nil {
+		serviceLogger.Error(errorMessageFailedToParseRequestBody, err, nil)
+		return domain.BatchGeocodingResponse{}, domain.NewValidationError(errorMessageInvalidJSONInRequestBody, "body")
+	}
+
+	if len(body.Municipalities) == 0 {
+		return domain.BatchGeocodingResponse{}, domain.NewValidationError("municipalities array is required and must not be empty", "municipalities")
+	}
+
+	serviceLogger.Debug("Batch geocoding municipalities", map[string]interface{}{
+		"count": len(body.Municipalities),
+	})
+
+	results := s.provider.GeocodeByMunicipalitiesBatch(body.Municipalities)
+
+	// Build response with errors for not found municipalities
+	errors := make([]string, 0)
+	foundCount := 0
+	for municipality, result := range results {
+		if result == nil {
+			errors = append(errors, "Municipality not found: "+municipality)
+		} else if result.Found {
+			foundCount++
+		}
+	}
+
+	serviceLogger.Info("Batch geocoding completed", map[string]interface{}{
+		"requested": len(body.Municipalities),
+		"found":     foundCount,
+		"notFound":  len(errors),
+	})
+
+	return domain.BatchGeocodingResponse{
+		Success: true,
+		Results: results,
+		Count:   foundCount,
+		Errors:  errors,
+	}, nil
+}
