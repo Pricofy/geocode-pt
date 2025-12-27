@@ -752,10 +752,11 @@ fields component, metadata.postalCode
 
 **Current:** ~50-100ms (loading 11,150 postal codes into memory)
 
-**Optimizations:**
-1. Increase memory to 1024MB (faster cold start, +$0.01/month)
-2. Provisioned concurrency (overkill for low traffic, +$10/month)
-3. Keep Lambda warm with EventBridge (ping every 5 minutes)
+**Solution: Lambda Warmup (Implemented)**
+- CloudWatch Events trigger warmup every 5 minutes
+- Self-invokes with concurrency=2 to maintain 3 warm instances
+- Warmup detected before operation routing, returns immediately
+- Files: `cmd/warmup.go`, `cmd/main.go` (warmup detection)
 
 ---
 

@@ -235,6 +235,23 @@ make deploy ENV=dev
 
 ---
 
+## 🔥 Lambda Warmup
+
+This service includes automatic warmup to prevent cold starts.
+
+- **Trigger**: CloudWatch Events every 5 minutes
+- **Instances**: 3 warm instances (1 original + 2 self-invoked)
+- **Event**: `{"source": "warmup", "concurrency": 2}`
+
+Warmup events are detected before operation routing and return immediately with status `warm`.
+
+**Files:**
+- `cmd/warmup.go` - Warmup handler and self-invocation logic
+- `cmd/main.go` - Warmup detection at handler entry point
+- CDK stack - EventBridge Rule + IAM self-invoke permission
+
+---
+
 ## 🔧 Development
 
 ### Project Structure

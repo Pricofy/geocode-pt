@@ -420,3 +420,55 @@ components:
             type: integer
             description: Number of results returned
 
+
+  warmup:
+    action: receive
+    channel:
+      $ref: '#/channels/warmup'
+    summary: Lambda warmup (cold start prevention)
+    description: |
+      CloudWatch Events trigger this operation every 5 minutes to keep Lambda instances warm.
+      Self-invokes with concurrency=2 to maintain 3 warm instances.
+      Event: {"source": "warmup", "concurrency": 2}
+
+    WarmupRequest:
+      name: WarmupRequest
+      title: Warmup Request
+      summary: Lambda warmup request (cold start prevention)
+      payload:
+        type: object
+        required: [source]
+        properties:
+          source:
+            type: string
+            const: warmup
+            description: Warmup source identifier
+          concurrency:
+            type: integer
+            default: 0
+            description: Number of additional instances to spawn
+            example: 2
+
+    WarmupResponse:
+      name: WarmupResponse
+      title: Warmup Response
+      summary: Response from warmup operation
+      payload:
+        type: object
+        required: [statusCode]
+        properties:
+          statusCode:
+            type: integer
+            description: HTTP status code
+            example: 200
+          body:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Warmup status
+                example: warm
+              instancesWarmed:
+                type: integer
+                description: Number of instances warmed
+                example: 3

@@ -1,4 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as path from 'path';
@@ -66,6 +69,38 @@ export class GeocodePtStack extends cdk.Stack {
       logGroup: logGroup,
       tracing: lambda.Tracing.ACTIVE, // X-Ray tracing for observability
     });
+
+    // ===========================================
+    // Lambda Warmup (Cold Start Prevention)
+    // ===========================================
+
+    const warmupRule = new events.Rule(this, 'WarmupRule', {
+      ruleName: `pricofy-geocode-pt-warmup-${props.environment}`,
+      schedule: events.Schedule.rate(cdk.Duration.minutes(5)),
+      description: `Warmup for geocode-pt (${props.environment})`,
+    });
+
+    warmupRule.addTarget(
+      new targets.LambdaFunction(this.geocodeFunction, {
+        event: events.RuleTargetInput.fromObject({
+          body: JSON.stringify({
+            source: 'warmup',
+            concurrency: 2,
+          }),
+        }),
+        retryAttempts: 0,
+      })
+    );
+
+    // Self-invoke permission for warmup (manual ARN to avoid circular dependency)
+    const functionArn = `arn:aws:lambda:${this.region}:${this.account}:function:pricofy-geocode-pt`;
+    this.geocodeFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['lambda:InvokeFunction'],
+        resources: [functionArn],
+      })
+    );
 
     // ===========================================
     // Exports (for pricofy-location-service to import)

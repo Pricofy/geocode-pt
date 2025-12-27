@@ -73,6 +73,10 @@ func main() {
 // It routes incoming events to the appropriate operation handler based on the "operation" field.
 // Uses the global app instance initialized during cold start.
 func Handler(ctx context.Context, event domain.LambdaEvent) (domain.LambdaResponse, error) {
+	// Warmup detection (MUST be first)
+	if warmup, ok := IsWarmupEvent(event); ok {
+		return HandleWarmup(ctx, warmup)
+	}
 	return globalApp.HandleRequest(ctx, event)
 }
 
